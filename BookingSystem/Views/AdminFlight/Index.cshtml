@@ -1,0 +1,147 @@
+﻿@model List<BookingSystem.Models.AdminFlightViewModel>
+
+@using System.Security.Claims
+
+@{
+    var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+    var userRole = User?.FindFirst(ClaimTypes.Role)?.Value ?? "Unknown";
+}
+
+@{
+    ViewData["Title"] = "Flight Details";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Flight</h1>
+
+    @if (isAuthenticated && userRole == "admin")
+    {
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#createFlightModal">
+            Create New Flight
+        </button>
+    }
+
+    <!-- Modal for creating a new flight -->
+    <div class="modal fade" id="createFlightModal" tabindex="-1" role="dialog" aria-labelledby="createFlightModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createFlightModalLabel">Create New Flight</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form for creating a new flight -->
+                    <form asp-controller="AdminFlight" asp-action="Create" method="post">
+                        <div class="form-group">
+                            <label for="flightNumber">Flight Number:</label>
+                            <input type="text" class="form-control" id="flightNumber" name="FlightNumber">
+                        </div>
+                        <div class="form-group">
+                            <label for="departureAirport">Departure Airport:</label>
+                            <input type="text" class="form-control" id="departureAirport" name="DepartureAirport">
+                        </div>
+                        <div class="form-group">
+                            <label for="arrivalAirport">Arrival Airport:</label>
+                            <input type="text" class="form-control" id="arrivalAirport" name="ArrivalAirport">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table to display flight details -->
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Flight Number</th>
+                <th>Departure Airport</th>
+                <th>Arrival Airport</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var flight in Model)
+                {
+                    <tr>
+                        <td>@flight.FlightNumber</td>
+                        <td>@flight.DepartureAirport</td>
+                        <td>@flight.ArrivalAirport</td>
+                        <td>
+                            @if (isAuthenticated && userRole == "admin")
+                            {
+                                <button type="button" class="btn btn-primary" onclick="openEditFlightModal('@flight.Id', '@flight.FlightNumber', '@flight.DepartureAirport', '@flight.ArrivalAirport')">Edit</button>
+                                <form asp-action="Delete" asp-controller="AdminFlight" method="post" style="display: inline;">
+                                    <input type="hidden" name="id" value="@flight.Id" />
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this flight?')">Delete</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form method="post" action="@Url.Action("Book", "Booking")">
+                                    <input type="hidden" name="flightId" value="@flight.Id" />
+                                    <button type="submit" class="btn btn-primary">Book Now</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-center">No data found</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Modal for editing flight details -->
+    <div class="modal fade" id="editFlightModal" tabindex="-1" role="dialog" aria-labelledby="editFlightModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editFlightModalLabel">Edit Flight</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form for editing a flight -->
+                    <form id="editFlightForm" method="post">
+                        <input type="hidden" id="editFlightId" name="Id" />
+                        <div class="form-group">
+                            <label for="editFlightNumber">Flight Number:</label>
+                            <input type="text" class="form-control" id="editFlightNumber" name="FlightNumber">
+                        </div>
+                        <div class="form-group">
+                            <label for="editDepartureAirport">Departure Airport:</label>
+                            <input type="text" class="form-control" id="editDepartureAirport" name="DepartureAirport">
+                        </div>
+                        <div class="form-group">
+                            <label for="editArrivalAirport">Arrival Airport:</label>
+                            <input type="text" class="form-control" id="editArrivalAirport" name="ArrivalAirport">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openEditFlightModal(id, flightNumber, departureAirport, arrivalAirport) {
+        $('#editFlightId').val(id);
+        $('#editFlightNumber').val(flightNumber);
+        $('#editDepartureAirport').val(departureAirport);
+        $('#editArrivalAirport').val(arrivalAirport);
+        $('#editFlightModal').modal('show');
+    }
+</script>

@@ -1,0 +1,58 @@
+﻿@model List<BookingSystem.Models.AdminBookingModelView>
+
+@using System.Security.Claims
+
+@{
+    var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+    var userRole = User?.FindFirst(ClaimTypes.Role)?.Value ?? "Unknown";
+}
+
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center">Booking</h1>
+
+    <!-- Table to display booking details -->
+    <hr />
+    <table class="table table-responsive table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>User ID</th>
+                <th>Flight ID</th>
+                <th>Hotel ID</th>
+                <th>Rental Car ID</th>
+                <th>Date & Time of Booking</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var booking in Model)
+                {
+                    <tr>
+                        <td>@booking.UserId</td>
+                        <td>@booking.FlightId</td>
+                        <td>@booking.HotelId</td>
+                        <td>@booking.CarRentalId</td>
+                        <td>@booking.BookingDateTime</td>
+                        <td>
+                            <form asp-action="Delete" asp-controller="Booking" method="post" style="display: inline;">
+                                <input type="hidden" name="id" value="@booking.Id" />
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this booking?')">Cancel</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center">No data found</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,65 @@
+﻿@{
+    ViewData["Title"] = "Forgot Password";
+}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Forgot Password</h2>
+        <form id="resetPasswordForm">
+            <div class="form-group">
+                <label for="email">Enter your Email:</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">New Password:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm New Password:</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+            </div>
+            <div class="form-group">
+                <button type="button" id="resetPasswordBtn" class="btn btn-primary">Reset Password</button>
+            </div>
+        </form>
+    </div>
+    <div id="message"></div>
+
+    <script>
+        $(document).ready(function () {
+            // Handle form submission
+            $('#resetPasswordBtn').click(function () {
+                var email = $('#email').val();
+                var password = $('#password').val();
+                var confirmPassword = $('#confirmPassword').val();
+
+                // Make AJAX request
+                $.ajax({
+                    type: 'POST',
+                    url: '/User/ChangePassword', // Adjust URL based on your controller and action
+                    data: {
+                        email: email,
+                        password: password,
+                        confirmPassword: confirmPassword
+                    },
+                    success: function (response) {
+                        // Display success message
+                        $('#message').html('<div class="alert alert-success">' + response + '</div>');
+                    },
+                    error: function (xhr, status, error) {
+                        // Display error message
+                        $('#message').html('<div class="alert alert-danger">' + xhr.responseText + '</div>');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

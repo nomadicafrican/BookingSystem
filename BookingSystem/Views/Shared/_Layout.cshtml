@@ -1,0 +1,191 @@
+﻿@using System.Security.Claims
+
+@{
+    var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+    var userRole = User?.FindFirst(ClaimTypes.Role)?.Value ?? "Unknown";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MSX Bookings</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BookingSystem.styles.css" asp-append-version="true" />
+    <style>
+        .navbar {
+            background-color: white;
+            color: black;
+        }
+
+        .footer-basic {
+            background-color: white;
+            color: black;
+        }
+
+        .navbar-brand {
+            padding-left: 20px;
+        }
+
+        .footer-basic {
+            padding: 40px 0;
+            background-color: #f7f7f7;
+            color: #999;
+        }
+
+            .footer-basic h3 {
+                margin-top: 0;
+                color: #333;
+            }
+
+            .footer-basic ul {
+                padding: 0;
+                list-style: none;
+                text-align: center;
+                line-height: 1.8;
+            }
+
+                .footer-basic ul a {
+                    color: inherit;
+                    text-decoration: none;
+                    opacity: 0.8;
+                }
+
+                    .footer-basic ul a:hover {
+                        opacity: 1;
+                    }
+
+            .footer-basic .social {
+                text-align: center;
+                padding-bottom: 25px;
+            }
+
+                .footer-basic .social > a {
+                    font-size: 24px;
+                    width: 40px;
+                    height: 40px;
+                    line-height: 40px;
+                    display: inline-block;
+                    text-align: center;
+                    margin: 0 8px;
+                    color: #999;
+                    border-radius: 100%;
+                    border: 1px solid #ccc;
+                    transition: all 0.3s ease;
+                }
+
+                    .footer-basic .social > a:hover {
+                        color: #555;
+                        border-color: #555;
+                    }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Travel Agency</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent"
+                        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="AdminFlight" asp-action="Index">Flights</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="AdminHotel" asp-action="Index">Hotels</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="AdminCarRental" asp-action="Index">Cars</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Booking" asp-action="Index">Bookings</a>
+                        </li>
+                        @if (isAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <form method="post" asp-controller="User" asp-action="Logout">
+                                    <button type="submit" class="btn btn-link nav-link">Logout</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="User" asp-action="Login">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="User" asp-action="Signup">Signup</a>
+                            </li>
+                        }
+                    </ul>
+                    <!-- Search bar -->
+                    <form id="searchForm" class="form-inline my-2 my-lg-0 ml-auto">
+                        <input id="searchInput" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                        <button id="searchButton" class="btn btn-outline-primary my-2 my-sm-0" type="button">Search</button>
+                    </form>
+
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    <!-- Footer -->
+   
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("searchButton").addEventListener("click", function () {
+                // Get the value from the search input field
+                var searchText = document.getElementById("searchInput").value.toLowerCase();
+
+                // Define the URL endpoints for different search queries
+                var searchEndpoints = {
+                    "flights": "/AdminFlight/Index",
+                    "hotels": "/AdminHotel/Index",
+                    "cars": "/AdminCarRental/Index",
+                    "bookings": "/Booking/Index",
+                    "home": "/Home/Index"
+                };
+
+                // Check if the search query matches any predefined endpoints
+                if (searchEndpoints.hasOwnProperty(searchText)) {
+                    // Fetch the corresponding page using AJAX
+                    fetch(searchEndpoints[searchText])
+                        .then(response => response.text())
+                        .then(data => {
+                            // Extract the main content area from the fetched HTML
+                            var parser = new DOMParser();
+                            var htmlDoc = parser.parseFromString(data, 'text/html');
+                            var mainContent = htmlDoc.querySelector("main").innerHTML;
+
+                            // Update the main content area with the fetched HTML
+                            document.querySelector("main").innerHTML = mainContent;
+                        })
+                        .catch(error => {
+                            console.error("Error fetching page:", error);
+                        });
+                } else {
+                    // Handle other search functionalities here if needed
+                    // For now, you can display an alert
+                    alert("No matching page found for the search query.");
+                }
+            });
+        });
+    </script>
+
+
+</body>
+</html>

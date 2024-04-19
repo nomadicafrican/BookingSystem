@@ -1,0 +1,146 @@
+﻿@model List<BookingSystem.Models.AdminCarRentalViewModel>
+
+@using System.Security.Claims
+
+@{
+    var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+    var userRole = User?.FindFirst(ClaimTypes.Role)?.Value ?? "Unknown";
+}
+
+@{
+    ViewData["Title"] = "Rental Cars Details";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Rental Cars</h1>
+
+    @if (isAuthenticated && userRole == "admin")
+    {
+        <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#createCarRentalModal">
+            Create New Car For Rent
+        </button>
+    }
+
+    <!-- Modal for creating a new car rental -->
+    <div class="modal fade" id="createCarRentalModal" tabindex="-1" role="dialog" aria-labelledby="createCarRentalModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createCarRentalModalLabel">Create New Car For Rent</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form for creating a new car rental -->
+                    <form asp-controller="AdminCarRental" asp-action="Create" method="post">
+                        <div class="form-group">
+                            <label for="model">Model:</label>
+                            <input type="text" class="form-control" id="model" name="Model">
+                        </div>
+                        <div class="form-group">
+                            <label for="rentalCompany">Rental Company:</label>
+                            <input type="text" class="form-control" id="rentalCompany" name="RentalCompany">
+                        </div>
+                        <div class="form-group">
+                            <label for="pricePerDay">Price Per Day:</label>
+                            <input type="text" class="form-control" id="pricePerDay" name="PricePerDay">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table to display car rental details -->
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Model</th>
+                <th>Rental Company</th>
+                <th>Price Per Day</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var carRental in Model)
+                {
+                    <tr>
+                        <td>@carRental.Model</td>
+                        <td>@carRental.RentalCompany</td>
+                        <td>@carRental.PricePerDay</td>
+                        <td>
+                            @if (isAuthenticated && userRole == "admin")
+                            {
+                                <button type="button" class="btn btn-primary" onclick="openEditCarRentalModal('@carRental.Id', '@carRental.Model', '@carRental.RentalCompany', '@carRental.PricePerDay')">Edit</button>
+                                <form asp-action="Delete" asp-controller="AdminCarRental" method="post" style="display: inline;">
+                                    <input type="hidden" name="id" value="@carRental.Id" />
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this Car?')">Delete</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form method="post" action="@Url.Action("Book", "Booking")">
+                                    <input type="hidden" name="carRentalId" value="@carRental.Id" />
+                                    <button type="submit" class="btn btn-primary">Book Now</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-center">No data found</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Modal for editing car rental details -->
+    <div class="modal fade" id="editCarRentalModal" tabindex="-1" role="dialog" aria-labelledby="editCarRentalModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCarRentalModalLabel">Edit Car Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form for editing a car rental -->
+                    <form id="editCarRentalForm" method="post">
+                        <input type="hidden" id="editCarRentalId" name="Id" />
+                        <div class="form-group">
+                            <label for="editModel">Model:</label>
+                            <input type="text" class="form-control" id="editModel" name="Model">
+                        </div>
+                        <div class="form-group">
+                            <label for="editRentalCompany">Rental Company:</label>
+                            <input type="text" class="form-control" id="editRentalCompany" name="RentalCompany">
+                        </div>
+                        <div class="form-group">
+                            <label for="editPricePerDay">Price Per Day:</label>
+                            <input type="text" class="form-control" id="editPricePerDay" name="PricePerDay">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openEditCarRentalModal(id, model, rentalCompany, pricePerDay) {
+        $('#editCarRentalId').val(id);
+        $('#editModel').val(model);
+        $('#editRentalCompany').val(rentalCompany);
+        $('#editPricePerDay').val(pricePerDay);
+        $('#editCarRentalModal').modal('show');
+    }
+</script>

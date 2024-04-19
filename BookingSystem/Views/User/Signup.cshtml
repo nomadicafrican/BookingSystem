@@ -1,0 +1,35 @@
+﻿
+@{
+    ViewData["Title"] = "Signup";
+}
+
+@model BookingSystem.Models.User
+
+<div class="container">
+    <h2 class="text-center">Sign Up</h2>
+    <h3 class="text-center">Enter your details here to book your details now</h3>
+    <form asp-controller="User" asp-action="Create" method="post" style="padding-top: 100px; padding-bottom: 100px; width: 50%; margin: auto;">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label for="fullName">Full Name:</label>
+            <input type="text" class="form-control" id="fullName" name="fullName" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="phoneNumber">Phone Number:</label>
+            <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+        </div>
+    </form>
+</div>
+
+
